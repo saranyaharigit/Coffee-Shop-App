@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Shop App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6f4e37 0%, #8b6f47 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #6f4e37;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 5px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .menu-section h2 {
+            color: #6f4e37;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            background: #f9f9f9;
+        }
+        
+        .item-info {
+            flex: 1;
+        }
+        
+        .item-name {
+            font-weight: bold;
+            color: #333;
+            font-size: 1.1em;
+        }
+        
+        .item-price {
+            color: #6f4e37;
+            font-weight: bold;
+        }
+        
+        button {
+            background: #6f4e37;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+            margin-left: 10px;
+        }
+        
+        button:hover {
+            background: #5a3f2e;
+        }
+        
+        .order-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+        }
+        
+        .order-section h2 {
+            color: #6f4e37;
+            margin-bottom: 20px;
+        }
+        
+        .order-empty {
+            color: #999;
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+        }
+        
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .order-item span:last-child {
+            color: #6f4e37;
+            font-weight: bold;
+        }
+        
+        .order-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #6f4e37;
+            margin-top: 10px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .actions button {
+            flex: 1;
+            padding: 15px;
+            font-size: 1em;
+        }
+        
+        .btn-clear {
+            background: #d9534f;
+        }
+        
+        .btn-clear:hover {
+            background: #c9302c;
+        }
+        
+        .btn-checkout {
+            background: #5cb85c;
+        }
+        
+        .btn-checkout:hover {
+            background: #4cae4c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>☕ Coffee Shop</h1>
+            <p>Welcome to our coffee app</p>
+        </div>
+        
+        <div class="content">
+            <div class="menu-section">
+                <h2>Menu</h2>
+                <div id="menu"></div>
+            </div>
+            
+            <div class="order-section">
+                <h2>Your Order</h2>
+                <div id="order-list"></div>
+                <div id="order-total"></div>
+                <div class="actions">
+                    <button class="btn-clear" onclick="clearCart()">Clear Cart</button>
+                    <button class="btn-checkout" onclick="checkout()">Checkout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const menu = [
+            {name: "Espresso", price: 2.50},
+            {name: "Latte", price: 3.50},
+            {name: "Cappuccino", price: 3.00},
+            {name: "Americano", price: 2.00}
+        ];
+        
+        let cart = [];
+
+        function displayMenu() {
+            const menuDiv = document.getElementById('menu');
+            menuDiv.innerHTML = menu.map(coffee => `
+                <div class="menu-item">
+                    <div class="item-info">
+                        <div class="item-name">${coffee.name}</div>
+                        <div class="item-price">$${coffee.price.toFixed(2)}</div>
+                    </div>
+                    <button onclick="addToCart('${coffee.name}', ${coffee.price})">Add</button>
+                </div>
+            `).join('');
+        }
+
+        function addToCart(name, price) {
+            cart.push({name, price});
+            updateOrder();
+            alert(`Added ${name} to your order.`);
+        }
+
+        function updateOrder() {
+            const orderList = document.getElementById('order-list');
+            const orderTotal = document.getElementById('order-total');
+            
+            if (cart.length === 0) {
+                orderList.innerHTML = '<div class="order-empty">No items in order.</div>';
+                orderTotal.innerHTML = '';
+                return;
+            }
+            
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            
+            orderList.innerHTML = cart.map((item, i) => `
+                <div class="order-item">
+                    <span>${i + 1}. ${item.name}</span>
+                    <span>$${item.price.toFixed(2)}</span>
+                </div>
+            `).join('');
+            
+            orderTotal.innerHTML = `
+                <div class="order-total">
+                    <span>Total:</span>
+                    <span>$${total.toFixed(2)}</span>
+                </div>
+            `;
+        }
+
+        function clearCart() {
+            cart = [];
+            updateOrder();
+        }
+
+        function checkout() {
+            if (cart.length === 0) {
+                alert('Your cart is empty.');
+                return;
+            }
+            alert('Order confirmed! Thank you for your purchase.');
+            clearCart();
+        }
+
+        displayMenu();
+        updateOrder();
+    </script>
+</body>
+</html>
